@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(\\(Get-Item \"C:\\\\Users\\\\manpaus\\\\Desktop\\\\Claude\\\\bans-protocol.html\"\\).Length; \\(Get-Content \"C:\\\\Users\\\\manpaus\\\\Desktop\\\\Claude\\\\bans-protocol.html\" | Measure-Object -Line\\).Lines)",
+      "PowerShell(Start-Process \"c:\\\\Users\\\\manpaus\\\\Desktop\\\\Claude\\\\Project ISP568\\\\index.html\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\manpaus\\\\Desktop\\\\Claude\\\\Project ISP568\\\\js\\\\lib\" | Out-Null; Invoke-WebRequest -Uri \"https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js\" -OutFile \"c:\\\\Users\\\\manpaus\\\\Desktop\\\\Claude\\\\Project ISP568\\\\js\\\\lib\\\\three.min.js\"; \\(Get-Item \"c:\\\\Users\\\\manpaus\\\\Desktop\\\\Claude\\\\Project ISP568\\\\js\\\\lib\\\\three.min.js\"\\).Length)"
+    ]
+  }
+}
