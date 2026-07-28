@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BAN's Protocol — System Dossier (ISP568) · MISO 4‑in/1‑out/81‑rule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06070d; --bg2:#080b14;
+  --panel-top:rgba(18,26,40,.92); --panel-bot:rgba(9,14,23,.94);
+  --line:rgba(95,170,255,.28); --line-soft:rgba(95,170,255,.14);
+  --accent:#5fd0ff; --text:#e8f4ff; --dim:#8fa9c4; --dimmer:#5b7a99;
+  --good:#46e08c; --gold:#ffd36b; --warn:#ffb648; --bad:#ff4d6d; --purple:#9b7bff;
+  --disp:'Orbitron','Segoe UI',sans-serif; --mono:'Consolas',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:
+  radial-gradient(1200px 600px at 20% -10%,rgba(40,80,140,.18),transparent 60%),
+  radial-gradient(1000px 500px at 90% 0%,rgba(120,60,180,.12),transparent 55%),
+  var(--bg);
+  color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;}
+a{color:var(--accent);text-decoration:none}
+.wrap{max-width:1360px;margin:0 auto;padding:0 22px 90px}
+
+/* ---------- top bar ---------- */
+header{position:sticky;top:0;z-index:20;backdrop-filter:blur(8px);
+  background:linear-gradient(180deg,rgba(8,12,20,.96),rgba(8,12,20,.72));
+  border-bottom:1px solid var(--line);}
+.bar{max-width:1360px;margin:0 auto;padding:11px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brandwrap{display:flex;align-items:center;gap:12px}
+.badge{font-family:var(--disp);font-weight:700;font-size:11px;letter-spacing:1px;
+  padding:5px 10px;border-radius:7px;background:linear-gradient(135deg,#123,#0b1a2e);
+  border:1px solid var(--line);color:var(--accent);box-shadow:0 0 18px rgba(95,208,255,.18)}
+.brand{font-family:var(--disp);font-weight:900;font-size:18px;letter-spacing:.5px;
+  color:var(--text);text-shadow:0 0 22px rgba(95,208,255,.35)}
+.brand small{display:block;font-family:var(--mono);font-weight:400;font-size:11px;color:var(--dim);letter-spacing:.3px}
+nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+nav a{font-family:var(--disp);font-weight:500;font-size:11px;letter-spacing:.6px;color:var(--dim);
+  padding:7px 12px;border-radius:8px;border:1px solid transparent}
+nav a:hover{color:var(--text);border-color:var(--line-soft);background:rgba(95,170,255,.06)}
+.enginepill{font-family:var(--disp);font-weight:700;font-size:11px;letter-spacing:.6px;color:var(--good);
+  padding:6px 12px;border-radius:20px;border:1px solid rgba(70,224,140,.4);background:rgba(70,224,140,.08)}
+.enginepill .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);
+  margin-right:7px;box-shadow:0 0 10px var(--good);animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.backbtn{font-family:var(--disp);font-weight:700;font-size:11px;letter-spacing:.6px;color:var(--text);
+  padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:rgba(95,208,255,.12)}
+.backbtn:hover{background:rgba(95,208,255,.28)}
+
+/* ---------- hero ---------- */
+.hero{padding:40px 0 8px;text-align:center}
+.hero h1{font-family:var(--disp);font-weight:900;font-size:clamp(30px,5vw,56px);margin:0;
+  letter-spacing:1px;text-wrap:balance;
+  background:linear-gradient(90deg,#8fe4ff,#5fd0ff 40%,#9b7bff);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 26px rgba(95,208,255,.25))}
+.hero p{color:var(--dim);font-size:15px;margin:10px auto 0;max-width:720px}
+.statrow{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:26px 0 6px}
+.stat{min-width:120px;padding:14px 18px;border-radius:12px;border:1px solid var(--line);
+  background:linear-gradient(180deg,var(--panel-top),var(--panel-bot))}
+.stat .n{font-family:var(--disp);font-weight:900;font-size:26px;color:var(--accent);text-shadow:0 0 18px rgba(95,208,255,.3)}
+.stat .l{font-size:11px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+
+/* ---------- panels & sections ---------- */
+section{margin-top:34px;scroll-margin-top:78px}
+.sec-h{display:flex;align-items:center;gap:12px;margin:0 0 16px}
+.sec-h .tag{font-family:var(--disp);font-weight:700;font-size:12px;letter-spacing:2px;color:var(--accent);
+  padding:5px 11px;border-radius:6px;border:1px solid var(--line);background:rgba(95,170,255,.06)}
+.sec-h h2{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:.5px;margin:0;color:var(--text)}
+.sec-h .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.panel{background:linear-gradient(180deg,var(--panel-top),var(--panel-bot));
+  border:1px solid var(--line);border-radius:14px;padding:20px 22px;
+  box-shadow:0 10px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03)}
+.panel + .panel{margin-top:16px}
+.panel h3{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:1px;color:var(--accent);
+  margin:0 0 12px;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+.muted{color:var(--dim)}
+.kw{color:var(--accent)} .ok{color:var(--good)} .hot{color:var(--bad)} .amb{color:var(--warn)} .pur{color:var(--purple)}
+.callout{border-left:3px solid var(--gold);background:rgba(255,211,107,.06);
+  padding:13px 16px;border-radius:0 10px 10px 0;color:#f0e6cf}
+.callout b{color:var(--gold)}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+thead th{font-family:var(--disp);font-weight:700;font-size:10.5px;letter-spacing:1px;color:var(--accent);
+  text-transform:uppercase;position:sticky;top:0;background:#0b1220;z-index:1}
+tbody tr:hover{background:rgba(95,170,255,.05)}
+.scroll-x{overflow-x:auto}
+.pill{display:inline-block;font-family:var(--disp);font-weight:700;font-size:10px;letter-spacing:.5px;
+  padding:3px 8px;border-radius:12px;line-height:1.3;white-space:nowrap}
+
+/* ---------- input→output flow ---------- */
+.flowmap{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center}
+@media(max-width:820px){.flowmap{grid-template-columns:1fr}}
+.chipcol{display:flex;flex-direction:column;gap:8px}
+.iochip{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:9px 13px;border-radius:9px;border:1px solid var(--line-soft);background:rgba(10,16,26,.6)}
+.iochip b{font-family:var(--disp);font-weight:700;font-size:12px}
+.iochip span{font-size:11px;color:var(--dim)}
+.engineblob{text-align:center;padding:20px 16px;border-radius:14px;border:1px solid var(--line);
+  background:radial-gradient(circle at 50% 30%,rgba(95,208,255,.16),rgba(9,14,23,.9));min-width:150px}
+.engineblob .big{font-family:var(--disp);font-weight:900;font-size:30px;color:var(--accent);text-shadow:0 0 20px rgba(95,208,255,.4)}
+.engineblob .sub{font-size:11px;color:var(--dim);letter-spacing:1px;margin-top:4px}
+
+/* ---------- live cockpit ---------- */
+.slidergrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 22px}
+@media(max-width:720px){.slidergrid{grid-template-columns:1fr 1fr}}
+.sl label{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.5px;margin-bottom:5px}
+.sl label b{font-family:var(--disp);font-weight:700;color:var(--text)}
+.sl label span{color:var(--accent);font-family:var(--disp);font-weight:700}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:4px;
+  background:linear-gradient(90deg,var(--accent),#2a4a6a);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:#dff;border:2px solid var(--accent);box-shadow:0 0 10px var(--accent);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#dff;
+  border:2px solid var(--accent);box-shadow:0 0 10px var(--accent);cursor:pointer}
+.ctrlbtns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn{font-family:var(--disp);font-weight:700;font-size:11px;letter-spacing:.6px;cursor:pointer;
+  padding:9px 15px;border-radius:9px;border:1px solid var(--line);background:rgba(95,208,255,.1);color:var(--text)}
+.btn:hover{background:rgba(95,208,255,.24)}
+.btn.on{background:rgba(70,224,140,.2);border-color:rgba(70,224,140,.5);color:var(--good)}
+
+.gauge{margin-bottom:18px}
+.gauge .top{display:flex;justify-content:space-between;align-items:baseline}
+.gauge .name{font-family:var(--disp);font-weight:700;font-size:13px}
+.gauge .val{font-family:var(--disp);font-weight:900;font-size:20px}
+.gauge .track{height:10px;border-radius:6px;background:rgba(120,150,180,.15);margin:7px 0;overflow:hidden}
+.gauge .fill{height:100%;border-radius:6px;transition:width .18s ease,background .18s ease}
+.gauge .impact{font-size:12px;color:var(--dim);min-height:34px}
+.gauge .impact b{color:var(--text)}
+
+.plotrow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.plotrow .lab{width:74px;flex:none;font-size:10.5px;color:var(--dim);letter-spacing:.3px;text-align:right;line-height:1.2}
+.plotrow canvas{flex:1;height:58px;width:100%;display:block}
+.outplot{margin-bottom:12px}
+.outplot .cap{font-size:10.5px;color:var(--dim);letter-spacing:.5px;margin-bottom:3px;
+  display:flex;justify-content:space-between}
+.outplot canvas{width:100%;height:96px;display:block}
+
+.fzz{width:100%;font-size:11px}
+.fzz td{padding:4px 6px;border-bottom:1px solid var(--line-soft)}
+.fzz .t{color:var(--dim)}
+.barmini{display:inline-block;height:7px;border-radius:4px;vertical-align:middle;margin-left:6px}
+
+.firelist{font-size:11.5px}
+.firelist .r{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid var(--line-soft)}
+.firelist .r code{color:var(--accent)}
+.firelist .r .s{color:var(--gold);font-family:var(--disp);font-weight:700;font-size:10px}
+
+/* ---------- policy cards ---------- */
+.policy{padding:16px;border-radius:12px;border:1px solid var(--line-soft);background:rgba(10,16,26,.55)}
+.policy h4{font-family:var(--disp);font-weight:700;font-size:13px;margin:0 0 8px}
+.formula{font-family:var(--mono);font-size:12.5px;background:#070b12;border:1px solid var(--line-soft);
+  border-radius:8px;padding:10px 12px;color:#cfe;overflow-x:auto;white-space:nowrap}
+.thr{font-size:11px;color:var(--dim);margin-top:8px}
+
+/* ---------- system flow ---------- */
+.pipe{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
+.step{flex:1 1 150px;min-width:140px;padding:12px 14px;border-radius:11px;border:1px solid var(--line-soft);
+  background:linear-gradient(180deg,rgba(16,24,38,.9),rgba(9,14,23,.9));position:relative}
+.step .no{font-family:var(--disp);font-weight:900;font-size:11px;color:var(--accent);opacity:.7}
+.step b{display:block;font-family:var(--disp);font-weight:700;font-size:12.5px;margin:3px 0 4px}
+.step span{font-size:11px;color:var(--dim)}
+
+.catgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.cat{padding:14px;border-radius:11px;border:1px solid var(--line-soft);background:rgba(10,16,26,.55)}
+.cat b{font-family:var(--disp);font-weight:700;font-size:12.5px;color:var(--accent)}
+.cat p{margin:6px 0 0;font-size:11.5px;color:var(--dim)}
+
+.filterbar{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.filterbar input{background:#070b12;border:1px solid var(--line);border-radius:8px;color:var(--text);
+  font-family:var(--mono);font-size:12px;padding:8px 12px;min-width:240px;outline:none}
+.filterbar input:focus{border-color:var(--accent)}
+.rulewrap{max-height:520px;overflow:auto;border:1px solid var(--line-soft);border-radius:10px}
+.rulecount{font-size:11px;color:var(--dim)}
+footer{margin-top:50px;padding-top:22px;border-top:1px solid var(--line-soft);color:var(--dim);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brandwrap">
+      <span class="badge">DOSSIER v2.0 (MISO)</span>
+      <span class="brand">BAN's PROTOCOL<small>MISO fuzzy director · ISP568 Fuzzy Logic Systems</small></span>
+    </div>
+    <nav>
+      <a href="#overview">OVERVIEW</a>
+      <a href="#live">LIVE INFERENCE</a>
+      <a href="#policies">POLICY</a>
+      <a href="#flow">SYSTEM FLOW</a>
+      <a href="#rules">RULE BASE</a>
+      <a href="#files">CODE</a>
+    </nav>
+    <span class="enginepill"><span class="dot"></span>81 RULES ONLINE</span>
+    <a class="backbtn" href="../index.html">◄ BACK TO GAME</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero" id="overview">
+    <h1>SYSTEM DOSSIER · MISO</h1>
+    <p>A top-down survival shooter whose entire difficulty is driven by a live Mamdani fuzzy-inference engine.
+       This dossier documents the system — and lets you drive the real engine yourself.</p>
+    <div class="statrow">
+      <div class="stat"><div class="n">4</div><div class="l">Fuzzy Inputs</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">Fuzzy Output</div></div>
+      <div class="stat"><div class="n">81</div><div class="l">Mamdani Rules</div></div>
+      <div class="stat"><div class="n">3⁴</div><div class="l">Complete Grid</div></div>
+    </div>
+  </div>
+
+  <!-- EXEC BRIEF -->
+  <section>
+    <div class="sec-h"><span class="tag">01</span><h2>What This Is</h2><span class="rule"></span></div>
+    <div class="panel">
+      <p><b class="kw">BAN's Protocol</b> is a pure HTML5-Canvas survival shooter set in a randomly generated maze.
+      The enemy horde is <b>not</b> driven by random spawns or a fixed difficulty curve — a fuzzy-logic
+      <b class="kw">"AI director"</b> reads the player's live state roughly twice a second and decides how aggressive
+      the horde should be, and how generously to drop supplies.</p>
+      <div class="callout" style="margin-top:14px">
+        <b>What you are looking at.</b> The engine is a <b>MISO</b> (Multiple‑Input Single‑Output) Mamdani system
+        with <b>4 crisp inputs</b> (Health, Ammo, Noise, Pressure) and <b>1 crisp output</b> (Threat).
+        The complete rule base has <b>3⁴ = 81</b> rules, generated from a single transparent scoring policy.
+        The game then uses Threat to drive spawn cadence, horde size, and drop generosity.
+      </div>
+    </div>
+  </section>
+
+  <!-- SYSTEM AT A GLANCE -->
+  <section>
+    <div class="sec-h"><span class="tag">02</span><h2>The System at a Glance</h2><span class="rule"></span></div>
+    <div class="panel">
+      <div class="flowmap">
+        <div class="chipcol" id="inGlance"></div>
+        <div class="engineblob"><div class="big">FIS</div><div class="sub">MAMDANI<br>81 RULES</div></div>
+        <div class="chipcol" id="outGlance"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEVELOPMENT PHASES -->
+  <section>
+    <div class="sec-h"><span class="tag">03</span><h2>Development Phases — How the Game Evolved</h2><span class="rule"></span></div>
+    <div class="panel scroll-x">
+      <table>
+        <thead><tr><th>Phase</th><th>Theme</th><th>Key additions</th></tr></thead>
+        <tbody>
+          <tr><td><b class="kw">Base v5</b></td><td>Core director + world</td>
+            <td>Rebuild to modular JS · 3→5 inputs (added Pressure, Exposure) · 11→243 generated rules ·
+                procedural maze, line-of-sight / fog stealth, perception AI · 2nd output <b>Supply</b> ·
+                per-enemy micro-FIS · weapons / coins / power-ups · procedural audio + soundtrack + beat-reactive
+                lighting · 2.5D neon visuals · boss waves + roguelite sectors</td></tr>
+          <tr><td><b class="kw">Phase 1</b></td><td>Combat depth</td>
+            <td>Spitter (ranged) enemy · elite affixes (shielded / volatile / frenzied) · boss attack patterns
+                (radial burst + charge) · dodge dash (i-frames) · melee knife + silent stealth takedowns ·
+                combo / killstreak multiplier · damage-direction indicator · boss minimap ping</td></tr>
+          <tr><td><b class="kw">Phase 2</b></td><td>Roguelite variety</td>
+            <td>Pick-1-of-3 <b>perks</b> after each boss (12 run modifiers) · random <b>sector modifiers</b> ·
+                deployable mine + fuzzy turret · exploding barrels + destructible walls ·
+                extraction-beacon objective · 11 achievements · daily-seed challenge</td></tr>
+          <tr><td><b class="kw">Phase 3</b></td><td>MISO refinement <span class="muted">(this report)</span></td>
+            <td>Streamlined to <b>4 inputs</b> (Health, Ammo, Noise, Pressure) · <b>1 output</b> (Threat) ·
+                simplified to <b>81 rules</b> with a clear heuristic · centroid defuzzification ·
+                in-game <b>Fuzzy Analytics</b>: control surface, rule heatmap, defuzzifier comparison,
+                "why this threat?" explainability, CSV data‑logger</td></tr>
+          <tr><td><b class="kw">Phase 4</b></td><td>UX &amp; polish</td>
+            <td>Settings menu (volume / toggles) · pause menu + stats · first-run tutorial · threat-dynamic music ·
+                player-cast wall shadows · gib death effects · gamepad + touch · offscreen floor cache ·
+                central balance config</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- LIVE INFERENCE COCKPIT -->
+  <section id="live">
+    <div class="sec-h"><span class="tag">04</span><h2>Live Mamdani Inference — Drive the Real Engine</h2><span class="rule"></span></div>
+
+    <div class="panel">
+      <h3>Live Inputs — move the sliders, watch the director react</h3>
+      <div class="slidergrid" id="sliders"></div>
+      <div class="ctrlbtns">
+        <button class="btn" id="autoBtn">▶ AUTO DEMO</button>
+        <button class="btn" id="resetBtn">↺ WORKED EXAMPLE (H50 · A55 · N55 · P15)</button>
+        <button class="btn" id="modeBtn">DEFUZZ: MAMDANI (centroid)</button>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <!-- LEFT: engine outputs -->
+      <div class="panel">
+        <h3>◈ Active DDA Engine Output</h3>
+        <div id="gauges"></div>
+        <h3 style="margin-top:18px">▸ Top Firing Rules (live)</h3>
+        <div class="firelist" id="fireList"></div>
+      </div>
+
+      <!-- RIGHT: plots -->
+      <div>
+        <div class="panel">
+          <h3>∿ Fuzzy Input Sets <span class="muted" style="float:right;font-family:var(--mono);font-weight:400">red = current value</span></h3>
+          <div id="inPlots"></div>
+        </div>
+        <div class="panel">
+          <h3>▤ Fuzzy Output Clips &amp; Centroid</h3>
+          <div id="outPlots"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <h3>Fuzzification snapshot — membership degrees for the current inputs</h3>
+      <div class="scroll-x"><table class="fzz" id="fzzTable"></table></div>
+      <p class="thr" style="margin-top:10px">This is step 2 of the pipeline: each crisp input is graded against its
+        three overlapping sets. Those degrees become the rule-firing strengths (AND = min) that clip the output sets below.</p>
+    </div>
+  </section>
+
+  <!-- POLICIES -->
+  <section id="policies">
+    <div class="sec-h"><span class="tag">05</span><h2>The Scoring Policy (why 81 rules stay consistent)</h2><span class="rule"></span></div>
+    <div class="panel">
+      <p class="muted" style="margin-top:0">4 inputs × 3 fuzzy sets each = <b class="kw">3⁴ = 81</b> antecedent combinations.
+        Every combination is covered, so the director never hits an undefined state. The rules are <b>not hand-written</b> —
+        each rule's consequent is <b>generated</b> from a transparent scoring policy over the term indices
+        (Low=0, Medium=1, High=2). The table is therefore exhaustive <i>and</i> internally consistent.</p>
+      <div class="grid3" style="margin-top:6px">
+        <div class="policy" style="grid-column:1/-1">
+          <h4 class="kw">THREAT → Aggression</h4>
+          <div class="formula">score = (2 − H) + (2 − A) + N + P   &nbsp;&nbsp;(range 0–8)</div>
+          <div class="thr">≤ 3 → <b class="kw">Low Threat</b> &nbsp; 4–5 → <b class="amb">Medium Threat</b> &nbsp; ≥ 6 → <b class="hot">High Threat</b><br>
+            Threat rises when Health and Ammo are low, and when Noise and Pressure are high. This drives spawn cadence, horde size, and drop generosity.</div>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:16px;font-size:12px"><b>Note:</b> In the game, Supply and Composition are no longer fuzzy outputs – they are derived from Threat (higher Threat gives more drops and heavier enemy mixes). This keeps the engine clean and focused on the single most important metric.</p>
+    </div>
+  </section>
+
+  <!-- SYSTEM FLOW -->
+  <section id="flow">
+    <div class="sec-h"><span class="tag">06</span><h2>System Flow — the Inference Loop</h2><span class="rule"></span></div>
+    <div class="panel">
+      <div class="pipe">
+        <div class="step"><div class="no">01</div><b>Sense</b><span>Read live state: Health, Ammo, Noise, Pressure.</span></div>
+        <div class="step"><div class="no">02</div><b>Fuzzify</b><span>Grade each input against its 3 membership sets → degrees.</span></div>
+        <div class="step"><div class="no">03</div><b>Evaluate</b><span>Fire all 81 rules, AND = min.</span></div>
+        <div class="step"><div class="no">04</div><b>Clip</b><span>Clip the output consequent sets by rule strength.</span></div>
+        <div class="step"><div class="no">05</div><b>Aggregate</b><span>Combine clipped sets per output with max.</span></div>
+        <div class="step"><div class="no">06</div><b>Defuzzify</b><span>Centroid → crisp Threat (0–100).</span></div>
+        <div class="step"><div class="no">07</div><b>Apply</b><span>Drive spawn rate &amp; speed, drop generosity, enemy-type mix.</span></div>
+        <div class="step"><div class="no">08</div><b>Loop</b><span>Repeat ≈ every half-second, all game long.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RULE BASE -->
+  <section id="rules">
+    <div class="sec-h"><span class="tag">07</span><h2>The Complete 81-Rule Base</h2><span class="rule"></span></div>
+    <div class="panel">
+      <div class="filterbar">
+        <input id="ruleFilter" placeholder="filter… e.g. High Low, Medium">
+        <span class="rulecount" id="ruleCount"></span>
+        <span class="rulecount" id="ruleStats"></span>
+      </div>
+      <div class="rulewrap scroll-x">
+        <table id="ruleTable">
+          <thead><tr>
+            <th>#</th><th>Health</th><th>Ammo</th><th>Noise</th><th>Pressure</th><th>→ Threat</th>
+          </tr></thead>
+          <tbody id="ruleBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION CATEGORIES -->
+  <section>
+    <div class="sec-h"><span class="tag">08</span><h2>In-Game Section Categories</h2><span class="rule"></span></div>
+    <div class="panel">
+      <div class="catgrid">
+        <div class="cat"><b>Fuzzy Director</b><p>The MISO 81-rule engine + per-enemy 27-rule micro-FIS + fuzzy weapon advisor.</p></div>
+        <div class="cat"><b>Combat &amp; Weapons</b><p>Rifle / shotgun / bazooka, levelling, dash, melee, stealth takedowns, combos.</p></div>
+        <div class="cat"><b>Roguelite Meta</b><p>Perks, sector modifiers, deployables, barrels, extraction, achievements, dailies.</p></div>
+        <div class="cat"><b>World</b><p>Procedural maze, walls, line-of-sight, fog-of-war stealth, minimap.</p></div>
+        <div class="cat"><b>Audio</b><p>Procedural SFX bus, adaptive ambient, streamed soundtrack, beat-reactive lighting.</p></div>
+        <div class="cat"><b>Fuzzy Analytics</b><p>In-game [C] overlay: control surface, rule heatmap, defuzz comparison, CSV export.</p></div>
+        <div class="cat"><b>HUD &amp; Gauges</b><p>Threat gauge, live membership graphs, rules panel, explainability line.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CODE FILES -->
+  <section id="files">
+    <div class="sec-h"><span class="tag">09</span><h2>Code Files — What Each One Does</h2><span class="rule"></span></div>
+    <div class="panel scroll-x">
+      <table>
+        <thead><tr><th>File</th><th>Role</th><th>Responsibility</th></tr></thead>
+        <tbody>
+          <tr><td><code>config.js</code></td><td>Boot</td><td>Canvas, 2D context, W/H, resize scaling.</td></tr>
+          <tr><td><code>balance.js</code></td><td>Tuning</td><td>Central constants for spawns, drops, elite chances.</td></tr>
+          <tr><td><code>fuzzy.js</code></td><td class="kw">Engine</td><td>The Mamdani MISO engine, 81-rule generator, centroid defuzzifier, micro-FIS, weapon advisor. (This page loads it directly.)</td></tr>
+          <tr><td><code>state.js</code></td><td>State</td><td>The single <code>G</code> game-state object + <code>reset()</code>.</td></tr>
+          <tr><td><code>world.js</code></td><td>World</td><td>Maze generation, walls, line-of-sight, fog, minimap.</td></tr>
+          <tr><td><code>weapons.js</code></td><td>Combat</td><td>Weapons, levelling, power-ups, coin meta.</td></tr>
+          <tr><td><code>roguelite.js</code></td><td>Meta</td><td>Perks, sector modifiers, deployables, barrels, achievements.</td></tr>
+          <tr><td><code>mechanics.js</code></td><td class="kw">Loop</td><td>Shoot / reload / spawn and the update loop; computes the 4 inputs and runs inference.</td></tr>
+          <tr><td><code>input.js</code></td><td>Input</td><td>Keyboard, mouse, gamepad, touch.</td></tr>
+          <tr><td><code>render.js</code></td><td>Render</td><td>World rendering, lights, shockwaves, pseudo-3D characters.</td></tr>
+          <tr><td><code>post.js</code></td><td>Render</td><td>Full-screen bloom post-process.</td></tr>
+          <tr><td><code>hud.js</code></td><td>UI</td><td>Threat gauge, membership graphs, rules panel, explainability, HUD.</td></tr>
+          <tr><td><code>screens.js</code></td><td>UI</td><td>Setup, armory, pause, the in-game SYSTEM DOSSIER + click routing.</td></tr>
+          <tr><td><code>analytics.js</code></td><td>Analytics</td><td>The fuzzy analytics overlay: control surface, rule heatmap, defuzz, CSV.</td></tr>
+          <tr><td><code>audio.js</code></td><td>Audio</td><td>Procedural WebAudio engine + streamed soundtrack.</td></tr>
+          <tr><td><code>main.js</code></td><td>Loop</td><td>The <code>requestAnimationFrame</code> loop; draws by game state.</td></tr>
+          <tr><td><code>report/dossier.html</code></td><td class="kw">Report</td><td>This document — the full report in the game's own style, driven by the live engine.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    BAN's PROTOCOL · Adaptive Horde Survival — ISP568 Fuzzy Logic Systems ·
+    4 inputs → 1 output · 81-rule Mamdani MISO director · every number on this page is computed live by the game's own <code>fuzzy.js</code>.
+  </footer>
+</div>
+
+<!-- the REAL engine — single source of truth -->
+<script src="../js/fuzzy.js"></script>
+<script>
+(function(){
+  "use strict";
+  if(typeof Fuzzy==='undefined'){ document.querySelector('.wrap').insertAdjacentHTML('afterbegin',
+    '<div class="panel" style="border-color:var(--bad);color:var(--bad);margin-top:20px">Could not load ../js/fuzzy.js — open this page from the deployed game (it lives in <code>game/report/</code>).</div>'); return; }
+
+  var TCOL=['#5fd0ff','#46e08c','#ff8a4d'];               // term colours: low / mid / high
+  function hexA(h,a){var n=parseInt(h.slice(1),16);return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';}
+
+  // ---- MISO inputs: 4 only ----
+  var IN=[
+    {key:'health',   label:'Health',   terms:['Low','Medium','High'], def:50, axis:['hurt','healthy']},
+    {key:'ammo',     label:'Ammo',     terms:['Low','Medium','High'], def:55, axis:['empty','full']},
+    {key:'noise',    label:'Noise',    terms:['Low','Medium','High'], def:55, axis:['silent','loud']},
+    {key:'pressure', label:'Pressure', terms:['Low','Medium','High'], def:15, axis:['safe','swarmed']}
+  ];
+  // ---- MISO outputs: only Threat ----
+  var OUT=[
+    {key:'threat', res:'threat', agg:'aggregate', label:'Threat (Aggression)', sets:Fuzzy.threatSets,
+      terms:['Low','Medium','High'], axis:['calm','relentless'],
+      impacts:['<b>Low Threat.</b> The horde holds back — spawns thin out and enemies move cautiously, giving you room to breathe.',
+               '<b>Medium Threat.</b> Balanced pressure. Enemies flank and commit in measured waves.',
+               '<b>High Threat.</b> Relentless. Faster, bolder enemies rush the player, spawn counts spike.']}
+  ];
+
+  var state={}; IN.forEach(function(v){state[v.key]=v.def;});
+  var mode='mamdani';
+
+  /* ---------- glance chips ---------- */
+  (function(){
+    var ic=document.getElementById('inGlance'), oc=document.getElementById('outGlance');
+    IN.forEach(function(v){ ic.insertAdjacentHTML('beforeend',
+      '<div class="iochip"><b class="kw">'+v.label+'</b><span>'+v.terms.join(' · ')+'</span></div>'); });
+    oc.insertAdjacentHTML('beforeend',
+      '<div class="iochip"><b class="pur" style="color:#ff8a4d">Threat</b><span>drives spawn rate, size &amp; drops</span></div>');
+  })();
+
+  /* ---------- sliders ---------- */
+  var slHost=document.getElementById('sliders');
+  IN.forEach(function(v){
+    var wrap=document.createElement('div'); wrap.className='sl';
+    wrap.innerHTML='<label><b>'+v.label+'</b> <span id="v_'+v.key+'">'+v.def+'</span></label>'+
+      '<input type="range" min="0" max="100" value="'+v.def+'" id="s_'+v.key+'">';
+    slHost.appendChild(wrap);
+    wrap.querySelector('input').addEventListener('input',function(e){
+      state[v.key]=+e.target.value; document.getElementById('v_'+v.key).textContent=e.target.value; render();
+    });
+  });
+
+  /* ---------- input plots ---------- */
+  var inPlotHost=document.getElementById('inPlots');
+  IN.forEach(function(v){
+    var row=document.createElement('div'); row.className='plotrow';
+    row.innerHTML='<div class="lab">'+v.label+'</div><canvas id="c_'+v.key+'"></canvas>';
+    inPlotHost.appendChild(row);
+  });
+  var outPlotHost=document.getElementById('outPlots');
+  OUT.forEach(function(o){
+    var row=document.createElement('div'); row.className='outplot';
+    row.innerHTML='<div class="cap"><span>'+o.label+' — clipped sets</span><span id="cap_'+o.key+'"></span></div><canvas id="co_'+o.key+'"></canvas>';
+    outPlotHost.appendChild(row);
+  });
+
+  function fit(cv){var r=cv.getBoundingClientRect(),d=window.devicePixelRatio||1;
+    cv.width=Math.max(1,r.width*d);cv.height=Math.max(1,r.height*d);var c=cv.getContext('2d');
+    c.setTransform(d,0,0,d,0,0);return {c:c,w:r.width,h:r.height};}
+
+  function drawInput(v){
+    var cv=document.getElementById('c_'+v.key); if(!cv)return; var o=fit(cv),c=o.c,w=o.w,h=o.h;
+    c.clearRect(0,0,w,h);
+    var pL=6,pR=6,pT=8,pB=13, gx=function(x){return pL+(x/100)*(w-pL-pR);}, gy=function(m){return pT+(1-m)*(h-pT-pB);};
+    c.strokeStyle='rgba(95,170,255,.14)';c.lineWidth=1;c.beginPath();c.moveTo(pL,gy(0));c.lineTo(w-pR,gy(0));c.stroke();
+    var mf=Fuzzy[v.key];
+    v.terms.forEach(function(t,i){ c.strokeStyle=TCOL[i];c.lineWidth=1.8;c.shadowColor=TCOL[i];c.shadowBlur=5;c.beginPath();
+      for(var x=0;x<=100;x++){var px=gx(x),py=gy(mf[t](x));if(x===0)c.moveTo(px,py);else c.lineTo(px,py);} c.stroke();c.shadowBlur=0; });
+    var val=state[v.key], ix=gx(val);
+    c.strokeStyle=hexA('#ff4d6d',.9);c.setLineDash([3,3]);c.lineWidth=1.3;c.beginPath();c.moveTo(ix,pT-3);c.lineTo(ix,gy(0));c.stroke();c.setLineDash([]);
+    v.terms.forEach(function(t,i){var m=mf[t](val);if(m>0.01){c.fillStyle=TCOL[i];c.beginPath();c.arc(ix,gy(m),2.6,0,7);c.fill();}});
+    c.fillStyle='#5b7a99';c.font='9px Consolas';c.textAlign='left';c.fillText(v.axis[0],pL,h-2);
+    c.textAlign='right';c.fillText(v.axis[1],w-pR,h-2);
+  }
+
+  function drawOutput(o,res){
+    var cv=document.getElementById('co_'+o.key); if(!cv)return; var oo=fit(cv),c=oo.c,w=oo.w,h=oo.h;
+    c.clearRect(0,0,w,h);
+    var pL=6,pR=6,pT=14,pB=14, gx=function(x){return pL+(x/100)*(w-pL-pR);}, gy=function(m){return pT+(1-m)*(h-pT-pB);};
+    c.strokeStyle='rgba(95,170,255,.14)';c.lineWidth=1;c.beginPath();c.moveTo(pL,gy(0));c.lineTo(w-pR,gy(0));c.stroke();
+    var agg=res[o.agg], sets=o.sets;
+    o.terms.forEach(function(t,i){
+      var lvl=agg[t]||0;
+      c.strokeStyle=hexA(TCOL[i],.5);c.lineWidth=1;c.beginPath();
+      for(var x=0;x<=100;x++){var px=gx(x),py=gy(sets[t](x));if(x===0)c.moveTo(px,py);else c.lineTo(px,py);} c.stroke();
+      if(lvl>0.01){ c.fillStyle=hexA(TCOL[i],.28);c.beginPath();c.moveTo(gx(0),gy(0));
+        for(var x2=0;x2<=100;x2++){c.lineTo(gx(x2),gy(Math.min(sets[t](x2),lvl)));} c.lineTo(gx(100),gy(0));c.closePath();c.fill(); }
+    });
+    var cVal=res[o.res], cx=gx(cVal);
+    c.strokeStyle='#7CFF9B';c.lineWidth=2;c.shadowColor='#7CFF9B';c.shadowBlur=8;c.beginPath();c.moveTo(cx,pT-6);c.lineTo(cx,gy(0));c.stroke();c.shadowBlur=0;
+    c.fillStyle='#7CFF9B';c.font='bold 10px Consolas';c.textAlign=cVal>60?'right':'left';
+    c.fillText('centroid '+cVal.toFixed(1),cVal>60?cx-4:cx+4,pT-3);
+    c.fillStyle='#5b7a99';c.font='9px Consolas';c.textAlign='left';c.fillText(o.axis[0],pL,h-2);
+    c.textAlign='right';c.fillText(o.axis[1],w-pR,h-2);
+    document.getElementById('cap_'+o.key).textContent='';
+  }
+
+  /* ---------- gauges ---------- */
+  var gHost=document.getElementById('gauges');
+  OUT.forEach(function(o){
+    gHost.insertAdjacentHTML('beforeend',
+      '<div class="gauge"><div class="top"><span class="name">'+o.label+' '+
+      '<span class="pill" id="p_'+o.key+'"></span></span><span class="val" id="gv_'+o.key+'"></span></div>'+
+      '<div class="track"><div class="fill" id="gf_'+o.key+'"></div></div>'+
+      '<div class="impact" id="gi_'+o.key+'"></div></div>');
+  });
+  function band(v){return v>66?2:v>33?1:0;}
+  var BANDCOL=['#5fd0ff','#ffb648','#ff5d6d'];
+
+  function updGauge(o,res){
+    var v=res[o.res], b=band(v), col=BANDCOL[b];
+    document.getElementById('gv_'+o.key).textContent=v.toFixed(1)+'%';
+    document.getElementById('gv_'+o.key).style.color=col;
+    var f=document.getElementById('gf_'+o.key); f.style.width=Math.max(2,v)+'%';
+    f.style.background='linear-gradient(90deg,'+hexA(col,.55)+','+col+')';
+    f.style.boxShadow='0 0 12px '+hexA(col,.6);
+    var pill=document.getElementById('p_'+o.key); pill.textContent=o.terms[b];
+    pill.style.background=hexA(col,.16); pill.style.color=col; pill.style.border='1px solid '+hexA(col,.5);
+    document.getElementById('gi_'+o.key).innerHTML=o.impacts[b];
+  }
+
+  /* ---------- fuzzification table ---------- */
+  function updFzz(res){
+    var f=res.fuzzified, html='<thead><tr><th>Input</th><th>Set 0</th><th>Set 1</th><th>Set 2</th></tr></thead><tbody>';
+    IN.forEach(function(v){
+      html+='<tr><td class="kw">'+v.label+'</td>';
+      v.terms.forEach(function(t,i){ var m=f[v.key][t];
+        html+='<td class="t">'+t+' <b style="color:'+TCOL[i]+'">'+m.toFixed(2)+'</b>'+
+          '<span class="barmini" style="width:'+(m*44).toFixed(0)+'px;background:'+hexA(TCOL[i],.6)+'"></span></td>';
+      });
+      html+='</tr>';
+    });
+    document.getElementById('fzzTable').innerHTML=html+'</tbody>';
+  }
+
+  /* ---------- top firing rules ---------- */
+  function updFire(res){
+    var host=document.getElementById('fireList'), fired=res.fired||[], n=Math.min(7,fired.length), html='';
+    for(var i=0;i<n;i++){ var r=fired[i];
+      var antecedents = (r.rule.antecedentTerms || []).join(' · ');
+      var consequent = r.rule.consequent || '?';
+      html+='<div class="r"><code>'+antecedents+' → '+consequent+'</code><span class="s">'+(r.strength*100).toFixed(0)+'%</span></div>'; }
+    if(!n) html='<div class="muted">no rule firing</div>';
+    host.innerHTML=html;
+  }
+
+  /* ---------- master render ---------- */
+  function render(){
+    Fuzzy.setMode(mode);
+    var res=Fuzzy.infer({health:state.health,ammo:state.ammo,noise:state.noise,pressure:state.pressure},{});
+    IN.forEach(drawInput);
+    OUT.forEach(function(o){drawOutput(o,res);updGauge(o,res);});
+    updFzz(res); updFire(res);
+  }
+
+  /* ---------- controls ---------- */
+  var auto=null;
+  document.getElementById('autoBtn').addEventListener('click',function(){
+    var btn=this;
+    if(auto){clearInterval(auto);auto=null;btn.classList.remove('on');btn.textContent='▶ AUTO DEMO';return;}
+    btn.classList.add('on');btn.textContent='⏸ STOP AUTO';
+    var vel={}; IN.forEach(function(v){vel[v.key]=(Math.random()-0.5)*6;});
+    auto=setInterval(function(){
+      IN.forEach(function(v){
+        vel[v.key]+=(Math.random()-0.5)*2.5; vel[v.key]=Math.max(-5,Math.min(5,vel[v.key]));
+        state[v.key]=Math.max(0,Math.min(100,state[v.key]+vel[v.key]));
+        if(state[v.key]<=0||state[v.key]>=100)vel[v.key]*=-1;
+        document.getElementById('s_'+v.key).value=state[v.key];
+        document.getElementById('v_'+v.key).textContent=Math.round(state[v.key]);
+      });
+      render();
+    },90);
+  });
+  document.getElementById('resetBtn').addEventListener('click',function(){
+    if(auto){clearInterval(auto);auto=null;var ab=document.getElementById('autoBtn');ab.classList.remove('on');ab.textContent='▶ AUTO DEMO';}
+    IN.forEach(function(v){state[v.key]=v.def;document.getElementById('s_'+v.key).value=v.def;document.getElementById('v_'+v.key).textContent=v.def;});
+    render();
+  });
+  document.getElementById('modeBtn').addEventListener('click',function(){
+    mode=(mode==='mamdani')?'sugeno':'mamdani';
+    this.textContent=mode==='mamdani'?'DEFUZZ: MAMDANI (centroid)':'DEFUZZ: SUGENO (weighted avg)';
+    this.classList.toggle('on',mode==='sugeno'); render();
+  });
+
+  /* ---------- rule table ---------- */
+  (function(){
+    var body=document.getElementById('ruleBody');
+    function cellCol(lbl){
+      if(lbl==='Low')return '#5fd0ff';
+      if(lbl==='Medium')return '#ffb648';
+      return '#ff5d6d';
+    }
+    // Use the rules from Fuzzy (81)
+    var rows=Fuzzy.rules.map(function(r,i){
+      // r.antecedents: [H,A,N,P] numeric, but we can use antecedentTerms for display
+      var antTerms = r.antecedentTerms || [];
+      var tds = '<td class="muted">'+(i+1)+'</td>';
+      antTerms.forEach(function(a){ tds+='<td>'+a+'</td>'; });
+      var lbl = r.consequent;
+      var col = cellCol(lbl);
+      tds += '<td><span class="pill" style="background:'+hexA(col,.14)+';color:'+col+';border:1px solid '+hexA(col,.45)+'">'+lbl+'</span></td>';
+      var key = (antTerms.join(' ')+' '+lbl).toLowerCase();
+      return {html:'<tr>'+tds+'</tr>', key:key};
+    });
+    body.innerHTML=rows.map(function(r){return r.html;}).join('');
+    var stats = {Low:0,Medium:0,High:0};
+    Fuzzy.rules.forEach(function(r){ stats[r.consequent]++; });
+    document.getElementById('ruleStats').innerHTML='Threat split — <b class="kw">Low '+(stats.Low||0)+
+      '</b> · <b class="amb">Medium '+(stats.Medium||0)+'</b> · <b class="hot">High '+(stats.High||0)+'</b>';
+    var trs=body.children;
+    function applyFilter(q){
+      q=q.trim().toLowerCase(); var terms=q.split(/\s+/).filter(Boolean), shown=0;
+      for(var i=0;i<rows.length;i++){
+        var ok=!terms.length||terms.every(function(t){return rows[i].key.indexOf(t)>=0;});
+        trs[i].style.display=ok?'':'none'; if(ok)shown++;
+      }
+      document.getElementById('ruleCount').textContent=shown+' / '+rows.length+' rules';
+    }
+    document.getElementById('ruleFilter').addEventListener('input',function(e){applyFilter(e.target.value);});
+    applyFilter('');
+  })();
+
+  window.addEventListener('resize',function(){render();});
+  render();
+})();
+</script>
+</body>
+</html>
