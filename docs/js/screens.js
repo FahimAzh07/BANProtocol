@@ -557,7 +557,13 @@ function handleDown(p){
   if(G.state==='setup'){
     if(typeof handleAdvancedSetupClick==='function'&&handleAdvancedSetupClick(p))return;
     if(inRect(p,settingsGear)){ G.showSettings=true; if(window.Sound)Sound.ui(); return; }
-    if(inRect(p,reportChip)){ G.state='report'; G.reportScroll=0; if(window.Sound)Sound.ui(); return; }
+    // ---- CHANGED: goes directly to dossier.html ----
+    if(inRect(p,reportChip)){
+        window.location.href = REPORT_URL;
+        if(window.Sound) Sound.ui();
+        return;
+    }
+    // --------------------------------------------
     if(inRect(p,dailyChip)){ G.daily=!G.daily; if(window.Sound)Sound.ui(); return; }
     for(const s of sliders){ const kx=sliderKnobX(s);
       if(Math.hypot(p.x-kx,p.y-s.y)<22 || (p.x>=s.x&&p.x<=s.x+s.w&&Math.abs(p.y-s.y)<16)){
