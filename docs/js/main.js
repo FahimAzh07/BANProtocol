@@ -1,6 +1,7 @@
 "use strict";
 /* ----------------------------------------------------------------------------
    main.js — the requestAnimationFrame loop. update() then draw by state.
+   Includes Logic Dashboard call (toggle with Tab).
    ---------------------------------------------------------------------------- */
 function frame(){
   const frameStart=performance.now();
@@ -24,12 +25,23 @@ function frame(){
   else if(G.state==='report') drawReport();   // in-game SYSTEM DOSSIER (canvas briefing)
   else if(G.state==='history'&&typeof drawRunHistory==='function')drawRunHistory();
   ctx.restore();
+
+  // ---- OVERLAYS ----
   if(G.state==='play' && G.showAnalytics) drawAnalytics();   // fuzzy analytics overlay [C]
   else if(G.state==='play' && G.tutorial) drawTutorial();    // first-run overlay
-  if(G.showSettings) drawSettings();                         // settings on top of any screen
+
+  // ---- LOGIC DASHBOARD (toggle with Tab) ----
+  // Draws the full fuzzy pipeline: Fuzzification → Rules → Aggregation → Defuzzification
+  drawLogicDashboard();
+
+  // ---- SETTINGS (on top of everything) ----
+  if(G.showSettings) drawSettings();
+
+  // ---- PERFORMANCE ----
   if(typeof recordFramePerformance==='function')recordFramePerformance(performance.now()-frameStart);
   requestAnimationFrame(frame);
 }
+
 /* Automated browser smoke route: index.html?smoke=1 deploys a deterministic
    run and exposes a compact result in body.dataset for CI/headless checks. */
 if(typeof location!=='undefined'&&new URLSearchParams(location.search).has('smoke')){

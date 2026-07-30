@@ -2,6 +2,7 @@
 /* ----------------------------------------------------------------------------
    hud.js — HUD & fuzzy-logic visualisation: vitals bars, threat gauge,
    four membership-function graphs, active-rules panel, buttons, crosshair.
+   Also includes the Logic Dashboard (toggle with Tab).
    ---------------------------------------------------------------------------- */
 function bar(x,y,w,h,frac,col,label,val){
   ctx.fillStyle='rgba(0,0,0,0.5)';roundRect(x,y,w,h,h/2);ctx.fill();
@@ -418,4 +419,196 @@ function drawHUD(){
   if(G.advisor&&G.advisor.weapon!==G.weapon&&G.advisor.conf>.55&&G.meta.weapons[G.advisor.weapon]&&G.meta.weapons[G.advisor.weapon].owned){ctx.fillStyle='#9bb6ca';ctx.font='9px Consolas';ctx.textAlign='left';ctx.fillText('ADVISOR  /  '+G.advisor.weapon.toUpperCase(),18,H-92);}
   ctx.save();ctx.translate(mouse.x,mouse.y);ctx.strokeStyle=G.reloading>0?UI.warn:UI.accent;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,8,0,7);ctx.stroke();
   ctx.beginPath();ctx.moveTo(-14,0);ctx.lineTo(-5,0);ctx.moveTo(5,0);ctx.lineTo(14,0);ctx.moveTo(0,-14);ctx.lineTo(0,-5);ctx.moveTo(0,5);ctx.lineTo(0,14);ctx.stroke();ctx.restore();
+}
+
+/* ----------------------------------------------------------------------------
+   LOGIC DASHBOARD — shows the full fuzzy pipeline:
+   Fuzzification → Rules → Aggregation → Defuzzification
+   Toggle with Tab key (handled in input.js).
+   ---------------------------------------------------------------------------- */
+function drawLogicDashboard() {
+    if (!G.showDashboard) return;
+    if (G.state !== 'play' && G.state !== 'paused') return;
+
+    // Semi-transparent overlay
+    ctx.fillStyle = 'rgba(2, 6, 12, 0.88)';
+    ctx.fillRect(0, 0, W, H);
+
+    // Title
+    ctx.textAlign = 'center';
+    ctx.fillStyle = UI.accent;
+    ctx.font = '800 28px ' + UI.display;
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = '#0af';
+    ctx.fillText('FUZZY LOGIC DASHBOARD', W / 2, 46);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#8fa9c4';
+    ctx.font = '13px Consolas';
+    ctx.fillText('Live inference pipeline · 4 inputs → Threat · 81 rules', W / 2, 68);
+
+    // ---- SECTION 1: Inputs + Fuzzification ----
+    const x1 = 30, y1 = 90, w1 = 360, h1 = 280;
+    panel(x1, y1, w1, h1, '① FUZZIFICATION');
+    const inputs = G._inputs || { health: 50, ammo: 50, noise: 0, pressure: 0 };
+    const f = G.fuzzy.fuzzified || {};
+    const inputNames = ['health', 'ammo', 'noise', 'pressure'];
+    const inputLabels = ['Health', 'Ammo', 'Noise', 'Pressure'];
+    const termLabels = [
+        ['Low', 'Medium', 'High'],
+        ['Low', 'Medium', 'High'],
+        ['Low', 'Medium', 'High'],
+        ['Low', 'Medium', 'High']
+    ];
+    const colors = [
+        ['#ff4d6d', '#ffb648', '#46e08c'],
+        ['#ff4d6d', '#ffb648', '#46e08c'],
+        ['#46e08c', '#ffb648', '#ff4d6d'],
+        ['#46e08c', '#ffb648', '#ff4d6d']
+    ];
+
+    let yy = y1 + 34;
+    for (let i = 0; i < 4; i++) {
+        const key = inputNames[i];
+        const val = inputs[key] || 0;
+        const terms = f[key] || {};
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#9cf';
+        ctx.font = 'bold 11px Consolas';
+        ctx.fillText(inputLabels[i] + ' = ' + Math.round(val), x1 + 16, yy + 4);
+        ctx.textAlign = 'right';
+        for (let j = 0; j < 3; j++) {
+            const t = termLabels[i][j];
+            const mu = terms[t] || 0;
+            const col = colors[i][j];
+            ctx.fillStyle = col;
+            ctx.font = '10px Consolas';
+            ctx.fillText(t + ': ' + mu.toFixed(2), x1 + w1 - 8 - (2 - j) * 80, yy + 4);
+            // Mini bar
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(x1 + 140 + j * 74, yy - 2, 60, 10);
+            ctx.fillStyle = col;
+            ctx.fillRect(x1 + 140 + j * 74, yy - 2, 60 * Math.min(1, mu), 10);
+        }
+        yy += 26;
+    }
+
+    // ---- SECTION 2: Active Rules ----
+    const x2 = x1 + w1 + 16, y2 = y1, w2 = 440, h2 = 280;
+    panel(x2, y2, w2, h2, '② ACTIVE RULES (top 5)');
+    const fired = G.fuzzy.fired || [];
+    yy = y2 + 34;
+    const showRules = fired.slice(0, 5);
+    if (showRules.length === 0) {
+        ctx.fillStyle = '#5b7a99';
+        ctx.font = '13px Consolas';
+        ctx.textAlign = 'center';
+        ctx.fillText('No rules firing — the field is empty.', x2 + w2 / 2, yy + 40);
+    } else {
+        showRules.forEach((fr, idx) => {
+            const terms = fr.rule.antecedentTerms || ['?', '?', '?', '?'];
+            const outTerm = fr.rule.consequent || '?';
+            const strength = fr.strength || 0;
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#9cf';
+            ctx.font = '11px Consolas';
+            ctx.fillText('IF', x2 + 16, yy + 4);
+            ctx.fillStyle = '#e8f4ff';
+            const anteStr = terms.map((t, i) => inputLabels[i] + '=' + t).join(' ∧ ');
+            ctx.fillText(anteStr, x2 + 48, yy + 4);
+            ctx.textAlign = 'right';
+            const outCol = outTerm === 'High' ? '#ff4d6d' : outTerm === 'Medium' ? '#ffb648' : '#5fd0ff';
+            ctx.fillStyle = outCol;
+            ctx.font = 'bold 11px Consolas';
+            ctx.fillText('→ ' + outTerm, x2 + w2 - 16, yy + 4);
+            // Firing strength bar
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(x2 + 16, yy + 10, w2 - 32, 6);
+            ctx.fillStyle = '#5fd0ff';
+            ctx.fillRect(x2 + 16, yy + 10, (w2 - 32) * Math.min(1, strength), 6);
+            ctx.fillStyle = '#8fa9c4';
+            ctx.font = '9px Consolas';
+            ctx.textAlign = 'right';
+            ctx.fillText((strength * 100).toFixed(1) + '%', x2 + w2 - 16, yy + 20);
+            yy += 30;
+        });
+    }
+
+    // ---- SECTION 3: Aggregation + Output Sets ----
+    const x3 = x2 + w2 + 16, y3 = y1, w3 = Math.min(340, W - x3 - 30), h3 = 280;
+    if (w3 > 200) {
+        panel(x3, y3, w3, h3, '③ AGGREGATION');
+        const agg = G.fuzzy.aggregate || { Low: 0, Medium: 0, High: 0 };
+        const sets = Fuzzy.threatSets || { Low: () => 0, Medium: () => 0, High: () => 0 };
+        const outTerms = ['Low', 'Medium', 'High'];
+        const outColors = ['#5fd0ff', '#ffb648', '#ff4d6d'];
+        const gx = x3 + 16, gy = y3 + 34, gw = w3 - 32, gh = h3 - 60;
+
+        // Draw the three clipped output sets
+        for (let t = 0; t < 3; t++) {
+            const term = outTerms[t];
+            const strength = agg[term] || 0;
+            if (strength < 0.01) continue;
+            ctx.strokeStyle = outColors[t];
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            for (let i = 0; i <= 100; i++) {
+                const x = gx + (i / 100) * gw;
+                const mfVal = sets[term](i);
+                const clipped = Math.min(mfVal, strength);
+                const y = gy + gh - clipped * gh;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 0.15;
+            ctx.fillStyle = outColors[t];
+            ctx.beginPath();
+            ctx.moveTo(gx, gy + gh);
+            for (let i = 0; i <= 100; i++) {
+                const x = gx + (i / 100) * gw;
+                const mfVal = sets[term](i);
+                const clipped = Math.min(mfVal, strength);
+                const y = gy + gh - clipped * gh;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(gx + gw, gy + gh);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            // Legend
+            ctx.fillStyle = outColors[t];
+            ctx.fillRect(gx + (t * 60), gy + gh + 6, 10, 8);
+            ctx.fillStyle = '#8fa9c4';
+            ctx.font = '8px Consolas';
+            ctx.textAlign = 'left';
+            ctx.fillText(term + ' (' + (strength * 100).toFixed(0) + '%)', gx + 14 + (t * 60), gy + gh + 14);
+        }
+        ctx.globalAlpha = 1;
+
+        // ---- SECTION 4: Defuzzification (Result) ----
+        const th = G.fuzzy.threat || 0;
+        const cx = x3 + w3 / 2;
+        const cy = y3 + h3 - 36;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#7CFF9B';
+        ctx.font = 'bold 14px Consolas';
+        ctx.fillText('④ DEFUZZIFICATION (centroid)', cx, cy - 4);
+        ctx.fillStyle = '#7CFF9B';
+        ctx.font = '900 32px ' + UI.display;
+        ctx.shadowBlur = 14;
+        ctx.shadowColor = '#7CFF9B';
+        ctx.fillText('THREAT = ' + Math.round(th), cx, cy + 34);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#8fa9c4';
+        ctx.font = '11px Consolas';
+        const label = th > 66 ? 'OVERWHELMING' : th > 33 ? 'TACTICAL' : 'PASSIVE';
+        ctx.fillText(label, cx, cy + 56);
+    }
+
+    // ---- Close hint ----
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#5b7a99';
+    ctx.font = '11px Consolas';
+    ctx.fillText('Press  [Tab]  to close dashboard', W / 2, H - 18);
 }

@@ -2,39 +2,45 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>BAN's Protocol — Adaptive Horde Survival</title>
-<!-- display font for titles; falls back to Segoe UI if offline -->
+<meta name="google" content="notranslate">
+<meta name="robots" content="noai">
+<!-- display font for titles -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body autocomplete="off">
 <div id="wrap"><canvas id="c"></canvas></div>
+
+
+
 <div id="hint">WASD: move &nbsp;•&nbsp; Mouse: aim &nbsp;•&nbsp; Click / Space: shoot &nbsp;•&nbsp; X: alternate fire &nbsp;•&nbsp; Q / 1 / 2 / 3: weapons &nbsp;•&nbsp; R: reload &nbsp;•&nbsp; Shift: dash &nbsp;•&nbsp; F / RMB: melee &nbsp;•&nbsp; E: mine &nbsp;•&nbsp; T: turret &nbsp;•&nbsp; C: analytics &nbsp;•&nbsp; Esc: pause</div>
 
-<!-- Load order matters: each script builds on the previous ones. -->
-<script src="js/config.js"></script>   <!-- canvas, ctx, W/H, resize -->
-<script src="js/balance.js"></script>  <!-- central tuning constants -->
-<script src="js/audio.js"></script>    <!-- procedural WebAudio engine (SFX + adaptive ambient) -->
-<script src="js/world.js"></script>    <!-- maze generation, walls, LOS, fog, minimap -->
-<script src="js/fuzzy.js"></script>    <!-- 729-rule Mamdani/Sugeno director + per-enemy micro-FIS -->
-<script src="js/state.js"></script>    <!-- G game-state object + reset() -->
-<script src="js/weapons.js"></script>  <!-- weapons, levelling, power-ups, coin meta -->
-<script src="js/roguelite.js"></script><!-- perks, sector modifiers, deployables, barrels, achievements -->
-<script src="js/advanced.js"></script> <!-- v7 experiments, missions, themes, saves, modules, squad AI -->
-<script src="js/mechanics.js"></script><!-- shoot/reload/spawn/update loop -->
-<script src="js/input.js"></script>    <!-- keyboard + mouse handlers -->
-<script src="js/render.js"></script>   <!-- world rendering + lights/shockwaves + pseudo-3D characters -->
-<script src="js/post.js"></script>     <!-- full-screen bloom post-process -->
-<script src="js/hud.js"></script>      <!-- gauges, MF graphs, rules panel, HUD -->
-<script src="js/screens.js"></script>  <!-- setup / pause / death / settings / perks + click routing -->
-<script src="js/analytics.js"></script><!-- fuzzy analytics overlay: control surface, heatmap, defuzz, CSV [C] -->
-<!--
-<script src="js/lib/three.min.js"></script> optional first-person renderer 
-<script src="js/render3d.js"></script> toggleable 3D view; gameplay remains shared
+<!-- Load order matters -->
+<script src="js/config.js"></script>
+<script src="js/balance.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/world.js"></script>
+<script src="js/fuzzy.js"></script>
+<script src="js/state.js"></script>
+<script src="js/weapons.js"></script>
+<script src="js/roguelite.js"></script>
+<script src="js/advanced.js"></script>
+<script src="js/mechanics.js"></script>
+<script src="js/input.js"></script>
+<script src="js/render.js"></script>
+<script src="js/post.js"></script>
+<script src="js/hud.js"></script>
+<script src="js/screens.js"></script>
+<script src="js/analytics.js"></script>
+<!-- Three.js disabled for performance
+<script src="js/lib/three.min.js"></script>
+<script src="js/render3d.js"></script>
 -->
-<script src="js/main.js"></script>     <!-- requestAnimationFrame loop -->
+<script src="js/main.js"></script>
+
 </body>
 </html>

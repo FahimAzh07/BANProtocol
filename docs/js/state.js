@@ -29,6 +29,7 @@ const G = {
   fuzzyTimer:0,shake:0,
   skill:50,shotsFired:0,shotsHit:0,csvLog:[],showAnalytics:false,advisor:null,
   showRules:false,showGraphs:false,
+  showDashboard:false,  // <-- NEW: Toggle Logic Dashboard with Tab key
   _inputs:{health:100,ammo:100,noise:0,pressure:0},
   settings:{ pace:0.6, density:1.0, toughness:1.2, god:false },   // set on the setup screen
 };
@@ -58,6 +59,7 @@ function reset(){
   announceWave(1);                  // opening "WAVE 1" banner on deploy
   G.fuzzy={threat:25,supply:50,compo:50,aggregate:{},supplyAgg:{},compoAgg:{},fuzzified:{},fired:[]};
   G._inputs={health:100,ammo:100,noise:0,pressure:0,exposure:0};
+  G.showDashboard=false;  // <-- NEW: Reset dashboard state on new run
   G.cam.x=Math.max(0,Math.min(WORLD_W-W,sp.x-W/2));
   G.cam.y=Math.max(0,Math.min(WORLD_H-H,sp.y-H/2));
   initLoadout();   // weapons.js: equipped weapon, mags, upgrades, power timers
