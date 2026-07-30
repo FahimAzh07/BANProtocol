@@ -1,191 +1,236 @@
-# BAN's Protocol — Adaptive Horde Survival
+BAN's Protocol — Adaptive Horde Survival
 
-A fuzzy-logic-driven survival shooter. The default presentation is HTML5 Canvas + JS,
-with an optional integrated Three.js first-person view. A 729-rule Mamdani fuzzy controller reads the player's live state and
-continuously adjusts enemy aggression, horde size, and spawn behaviour across a scrolling
-maze world with stealth (vision/noise/fog) mechanics. Q cycles weapons.
+A MISO (Multiple-Input Single-Output) fuzzy-logic-driven survival shooter. The default presentation is HTML5 Canvas + JS, with an optional integrated Three.js first-person view. A 81-rule Mamdani fuzzy controller reads the player's live state (Health, Ammo, Noise, Pressure) and continuously adjusts enemy aggression, horde size, and spawn behaviour across a scrolling maze world with stealth (vision/noise/fog) mechanics. Q cycles weapons, Tab toggles the Logic Dashboard showing the full fuzzy pipeline.
 
-The first-person renderer is loaded and can be enabled in Settings. It shares the same
-world, combat, objectives, enemies, and fuzzy director as the top-down presentation.
+The first-person renderer can be enabled in Settings. It shares the same world, combat, objectives, enemies, and fuzzy director as the top-down presentation.
+Play online (clickable links)
 
-## Play online (clickable links)
+    ▶ Play the game: https://fahimazh07.github.io/BANProtocol/
 
-- **▶ Play the game:** https://claude.ai/code/artifact/d0585e97-0d79-4e1c-97dc-036b0461d796
-- **📊 Read the report:** https://claude.ai/code/artifact/7ef6cbff-9b7d-4007-b52c-d3bd0d0a7db3
+    📊 Read the report: https://fahimazh07.github.io/BANProtocol/report/dossier.html
 
-*(The hosted game is a self-contained, music-less build — click once to enable the procedural SFX. The full
-version with the Molchat Doma soundtrack runs from `game/index.html` locally, or deploy the `game/` folder to
-Netlify. Rebuild the single-file artifact with `node game/build_artifact.js <outDir>`.)*
+(The hosted game is a fully self-contained build with procedural SFX and the Molchat Doma soundtrack. Click once to enable audio. The full version runs from docs/index.html locally, or deploy the docs/ folder to GitHub Pages / Netlify.)
+Folder layout
+text
 
-## Folder layout
-
-```
 Project ISP568/
 ├── README.md            ← this file
-├── game/                ← the playable game (open game/index.html to run)
+├── docs/                ← the playable game (deployed to GitHub Pages)
 │   ├── index.html
 │   ├── css/style.css
 │   ├── audio/ … (bgm1–6.mp3 — the Molchat Doma soundtrack)
-│   └── js/ … (+ js/lib/three.min.js)
-└── report/              ← the ISP568 assessment report
-    ├── Progress_Report_1_UPDATED.{pdf,html,md,txt}
-    ├── _report_src.html        ← HTML template (build input)
-    ├── report_build.js         ← renders the SVG fuzzy graphs into the report
-    └── supporting-docs/        ← extra fuzzy-logic write-ups
-```
+│   ├── js/
+│   │   ├── lib/three.min.js (optional 3D renderer)
+│   │   ├── fuzzy.js       ← MISO engine (4 inputs → 1 output · 81 rules)
+│   │   ├── mechanics.js   ← game loop & director integration
+│   │   ├── hud.js         ← HUD + Logic Dashboard
+│   │   ├── ... (all other JS files)
+│   └── report/            ← the ISP568 assessment report
+│       └── dossier.html   ← interactive fuzzy logic report
+└── report/              ← source report files (build scripts, supporting docs)
 
-## Run it
+Run it
+Local Development
 
-Just open `game/index.html` in a browser (double-click works — plain script tags, no server needed).
-Or in VS Code: right-click `game/index.html` → *Open with Live Server* for auto-reload while editing.
+Just open docs/index.html in a browser (double-click works — plain script tags, no server needed).
+Or in VS Code: right-click docs/index.html → Open with Live Server for auto-reload while editing.
+Deploy to GitHub Pages
 
-**Rebuild the report** (after any change to the fuzzy graphs): `cd report && node report_build.js`,
-then open `Progress_Report_1_UPDATED.html` and *Print → Save as PDF*.
+    Rename your game/ folder to docs/.
 
-**Verify and simulate the director:** from `game/`, run `node tests/fuzzy.test.js` and
-`node tests/simulate_balance.js 20`. The simulator uses identical seeds for Fuzzy,
-Static, Linear, and Chaos synthetic state trajectories.
+    Push to GitHub.
 
-## Project structure
+    In repository Settings → Pages, set source to main branch, /docs folder.
 
-All paths below are inside **`game/`**.
+    Your game is live at https://<username>.github.io/<repo>/.
 
-| File | What's inside | Modify this to… |
-|---|---|---|
-| `index.html` | Canvas + script load order + display font | add new script files (order matters) |
-| `css/style.css` | Page chrome only (game UI is canvas-drawn) | change page background / hint bar |
-| `js/config.js` | Canvas, `ctx`, `W`/`H`, resize | change resolution |
-| `js/audio.js` | **Music + WebAudio**: shuffled BGM playlist from `audio/` (loading screen + gameplay, auto-advancing, **N** skips), **beat-reactive lighting** (real FFT beat detection on a server; tempo-pulse fallback on `file://`), procedurally-synthesised SFX, subtle Threat drone + low-HP heartbeat, mute (**M**) | swap tracks/BPM in `PLAYLIST`, tune sounds/ducking |
-| `js/post.js` | Full-screen **bloom** post-process (downsample → blur → additive composite) | bloom strength / buffer size |
-| `js/world.js` | Maze generation (39×23 tiles → 3900×2300 px world), wall collision, line-of-sight, fog zones, minimap prerender | maze size/density, fog count |
-| `js/fuzzy.js` | **The fuzzy engine**: 6 inputs, complete 729-rule base, Threat/Supply/Composition outputs, Mamdani/Sugeno comparison — plus `MicroFuzzy`, a 27-rule per-enemy controller | tune MF breakpoints, scoring coefficients, band thresholds |
-| `js/state.js` | `G` global state object + `reset()` | change starting values, add new run state |
-| `js/weapons.js` | Weapons (rifle/shotgun/bazooka), levelling, power-ups, coin meta (localStorage) | weapon stats/costs, power-up kinds/durations, coin rewards |
-| `js/mechanics.js` | `update()` loop, shooting, reload, `spawnWave()` director | change weapon feel, threat→gameplay formulas, add enemy types |
-| `js/input.js` | Keyboard + mouse handlers | add keybinds |
-| `js/render.js` | World rendering (camera, walls, fog), additive lights + shockwave rings, pseudo-3D `drawCharacter()`, UI palette | change visuals, add new entity rendering |
-| `js/advanced.js` | v7 experiments, missions, themes, telemetry/history, saves, weapon modules, squad navigation, accessibility | extend the advanced systems |
-| `js/render3d.js` | Integrated optional first-person Three.js renderer | change the 3D presentation |
-| `js/hud.js` | Threat gauge, MF graphs, active-rules panel, vitals | change HUD layout / visualisation |
-| `js/screens.js` | Setup screen (sliders + deploy), pause/death, click routing | add settings sliders, menus, buttons |
-| `js/main.js` | `requestAnimationFrame` loop | add new game states to the draw switch |
+Rebuild the Report
 
-## How the fuzzy loop works (short version)
+The interactive report is at docs/report/dossier.html. It loads the live fuzzy.js engine and lets you drive the inference with sliders.
 
-Every 10 frames, `mechanics.js` samples six crisp inputs (0–100):
-Health %, total Ammo %, Noise (gunfire + movement, decays −0.35/frame),
-Pressure (how swarmed the player already is), **Exposure** (detection: enemies
-with line-of-sight push it to 100; hiding in fog drains it ~5× faster; loud noise
-sets a "suspicious" floor of 65), and **Skill** (accuracy, kill rate, depth, and damage).
-`Fuzzy.infer()` fires the complete 729-rule base (3⁶ combinations; AND = min, OR = max)
-and defuzzifies Threat, Supply, and Composition outputs.
+To regenerate the static report:
+bash
 
-Exposure dominates the rule scoring, so an *unseen* player keeps Threat low no matter
-how strong they are — and when Detection < 15 the spawn director switches to pure
-noise-driven spawning (dead silence ⇒ almost nothing spawns; gunfire ⇒ waves scale
-with how loud you are).
+cd report && node report_build.js
 
-Enemy AI is perception-based: **see you** (LOS, blocked by walls & fog) → chase;
-**hear you** (range scales with Noise) → hunt the sound with positional error;
-neither → wander dumbly. The minimap (left panel) tracks you, walls, fog, and every
-enemy as a red dot.
+Then open Progress_Report_1_UPDATED.html and Print → Save as PDF.
+Verify and Simulate the Director
 
-Full v1 walkthrough with worked example: `report/supporting-docs/Section3_Fuzzy_Logic_Walkthrough.md`.
-Rule-base expansion (11 → 81 → 243 rules): `report/supporting-docs/Inference_Engine_Expansion_Report.md`.
+From the root folder, run:
+bash
 
-## Quick tuning cheat-sheet
+node tests/fuzzy.test.js
+node tests/simulate_balance.js 20
 
-- **Game too easy/hard overall** → setup-screen slider ranges in `js/screens.js` (`sliders` array) or defaults in `js/state.js` (`settings`).
-- **Director reacts too slow/fast** → inference interval (`G.fuzzyTimer>=10`) and noise gain/decay in `js/mechanics.js`.
-- **Difficulty curve shape** → rule weights `w` and MF breakpoints in `js/fuzzy.js`.
-- **Threat→pressure mapping** → formulas in `spawnWave()` and the `cadence` line in `js/mechanics.js`.
+The simulator uses identical seeds for Fuzzy, Static, Linear, and Chaos synthetic state trajectories.
+Project structure
 
-## Progression systems (v3)
+All paths below are inside docs/.
+File	What's inside	Modify this to…
+index.html	Canvas + script load order + display font + tap-to-start overlay	add new script files (order matters)
+css/style.css	Page chrome + mobile touch support + responsive styling	change page background, hint bar, mobile layout
+js/config.js	Canvas, ctx, W/H, responsive resize	change resolution or scaling
+js/audio.js	Music + WebAudio: shuffled BGM playlist from audio/ (auto-advancing, N skips), beat-reactive lighting, procedurally-synthesised SFX, Threat drone + low-HP heartbeat, mute (M)	swap tracks/BPM in PLAYLIST, tune sounds
+js/post.js	Full-screen bloom post-process	bloom strength / buffer size
+js/world.js	Maze generation (39×23 tiles → 3900×2300 px world), wall collision, line-of-sight, fog zones, minimap prerender	maze size/density, fog count
+js/fuzzy.js	The fuzzy engine – MISO system: 4 inputs (Health, Ammo, Noise, Pressure) → 1 output (Threat) · 81 rules (3⁴). Mamdani inference (AND=min, OR=max, centroid defuzzification) + MicroFuzzy (27-rule per-enemy controller)	tune MF breakpoints, rule heuristic, band thresholds
+js/state.js	G global state object + reset()	change starting values, add new run state
+js/weapons.js	Weapons (rifle/shotgun/bazooka), levelling, power-ups, coin meta (localStorage)	weapon stats/costs, power-up kinds/durations
+js/mechanics.js	update() loop, shooting, reload, spawnWave() director – computes the 4 crisp inputs and calls Fuzzy.infer()	change weapon feel, threat→gameplay formulas, add enemy types
+js/input.js	Keyboard + mouse + gamepad + touch handlers	add keybinds (Tab toggles Logic Dashboard)
+js/render.js	World rendering (camera, walls, fog), additive lights + shockwave rings, pseudo-3D characters, UI palette	change visuals, add new entity rendering
+js/render3d.js	Integrated optional first-person Three.js renderer	change the 3D presentation
+js/hud.js	Threat gauge, MF graphs, active-rules panel, vitals, Logic Dashboard	change HUD layout, dashboard content
+js/screens.js	Setup screen (sliders + deploy), armory, pause/death, click routing	add settings sliders, menus, buttons
+js/analytics.js	Fuzzy analytics overlay (C): control surface, rule heatmap, defuzz comparison, CSV export	change analytics visualisation
+js/advanced.js	v7 experiments: run archive, resume, objectives, themes, weapon modules, squad AI	extend advanced systems
+js/roguelite.js	Perks, sector modifiers, deployables, barrels, extraction beacon, achievements	add new perks or sector modifiers
+js/main.js	requestAnimationFrame loop – draws drawLogicDashboard()	add new game states to the draw switch
+How the fuzzy loop works (short version)
 
-- **Coins** — earned per kill (grunt 5¢ / runner 8¢ / brute 15¢), shown in the MISSION panel,
-  **banked to localStorage on death** so they persist between runs (key `bansProtocolMeta_v1`).
-- **Weapons & levelling** — RIFLE (free), SHOTGUN (350¢, 6-pellet spread), BAZOOKA (900¢, AoE blast).
-  Buy/upgrade/equip in the **ARMORY** (setup screen); each upgrade is +25% damage, max level 5.
-  Switch in-game with **1 / 2 / 3** or the bottom-left weapon pills.
-- **Power-ups** — randomized drop **guaranteed every 10 kills** + rare (4%) random drops:
-  Shield 10 s · Rapid Fire 8 s · 2× Damage 8 s · Speed 8 s · Freeze 5 s ·
-  **Instant Kill** (everything on screen dies, white flash).
-  Active effects show as timed pills at the bottom-right.
-- **Operative upgrades** (ARMORY, bottom strip) — permanent levels bought with coins:
-  Move Speed (+8%/lvl) · Max Health (+25 HP/lvl) · Ammo Stock (+30 reserve/lvl) ·
-  Power-Ups (+15% duration/lvl). Applied automatically at every deploy.
+Every 10 frames, mechanics.js samples 4 crisp inputs (0–100):
 
-## What's new in v4 — "advanced & modern"
+    Health – how hurt you are.
 
-- **Procedural audio (`audio.js`)** — every sound is synthesised (no files): per-weapon
-  gunshots, hits, kills, explosions, pickups, power-ups, damage, UI clicks. The
-  **ambient drone is scored by the fuzzy Threat output** — its loudness and filter
-  cutoff rise with the director's tension. Low-HP heartbeat. Toggle with **M**.
-- **Second fuzzy output — SUPPLY (`fuzzy.js`)** — the 243-rule base now defuzzifies a
-  *second* Mamdani output alongside Threat: how generous pickup drops are. It helps
-  the desperate (low health/ammo, swarmed) and starves the comfortable, **decoupled**
-  from how hard the horde hits. Shown as a live gauge (MISSION panel) and as a sixth
-  membership-function graph (`SUPPLY (OUTPUT)`); it actually scales drop rates in `mechanics.js`.
-- **Per-enemy micro-FIS (`MicroFuzzy`)** — each creature runs its own 27-rule fuzzy
-  controller (distance · own-health · allies-nearby → **Flee / Flank / Swarm**), so the
-  horde shows fuzzy behaviour at the *micro* scale too, not just the global director.
-  Turn on the RULES panel (**B**) to see each enemy's state as a coloured dot.
-- **Modern visuals** — full-screen **bloom** (`post.js`), additive **dynamic lighting**
-  (player aura + muzzle flash + explosion light), **shockwave rings**, **hit-stop** on
-  big kills/explosions, and an **Orbitron** display font for the titles.
-- **Waves & boss fights** — a fading banner announces every wave (every 15 kills);
-  **every 5th wave is a BOSS wave** — a slow, armoured *Juggernaut* (HP scales with
-  wave) with escorts, its own bottom-screen health bar, and a guaranteed double
-  power-up drop on death.
-- **Persistent records** — best wave + best score survive death (localStorage); shown
-  on the setup screen (top-left) and the death screen, with a "★ NEW RECORD ★" flash.
-- **Map overhaul (v5)** — raised **2.5D neon walls** with contact shadows + threat-tinted
-  rims, a layered **tech-grid floor** with glowing nodes, drifting **dust**, animated
-  **volumetric fog**, persistent **scorch & blood decals**, and whole-map **threat-reactive
-  colour grading** (cyan → amber → red as the fuzzy Threat climbs).
-- **Roguelike sectors (v5)** — clearing a boss wave fades out, **reshuffles the entire maze**
-  into a new SECTOR (keeping your stats/loadout), and fades back in — endless randomised
-  layouts until you die. Sector shown in the HUD.
-- **Combat depth (v6, Phase 1)** — **spitter** (ranged) enemy + enemy projectiles · **elite**
-  affixes (shielded / volatile / frenzied, coloured auras, double reward) · **boss attack patterns**
-  (telegraphed radial burst + charge) · **dodge dash** (Shift, i-frames) · **melee knife** (F / RMB)
-  with silent **stealth takedowns** on unaware enemies · **combo/killstreak** score multiplier ·
-  **damage-direction indicator** + **boss minimap ping**.
-- **Roguelite variety (v6, Phase 2, `js/roguelite.js`)** — after each boss, **pick 1 of 3 perks**
-  (12 run modifiers) · random **sector modifiers** (Dense Fog / Runner Pack / Gold Rush / Overclocked /
-  Supply Drop) · **deployables**: proximity **mine [E]** + fuzzy auto-**turret [T]** · **exploding barrels**
-  + **destructible walls** (bazooka/blasts carve new paths) · an **extraction beacon** bonus objective ·
-  **11 achievements** (localStorage, toasts) · a **Daily Seed** toggle (deterministic maze for the day).
-- **Fuzzy depth (v6, Phase 3)** — the engine grew to **6 inputs → 3 outputs → 729 rules**: added a
-  **Skill** input (adaptive difficulty from accuracy/kill-rate/depth) and a **Composition** output
-  (fuzzy-controlled enemy-type mix). New **Fuzzy Analytics** overlay (**C**): live **control-surface plot**
-  (Threat over Exposure×Noise), **rule-firing heatmap**, **defuzzification comparison** (centroid /
-  bisector / mean-of-maxima / **Sugeno**, with a runtime Mamdani↔Sugeno toggle), a **"why this threat?"
-  explainability** line, a **fuzzy weapon advisor**, and a **CSV data-logger export**.
-- **UX & polish (v6, Phase 4)** — **settings menu** (master / music / SFX volume, screen-shake &
-  ambient-motion toggles; ⚙ on setup + in pause) · **pause menu** with run stats (Resume / Settings /
-  Restart / Quit) · first-run **tutorial** overlay · **threat-dynamic music** (fuller as Threat rises) ·
-  **player-cast wall shadows** · per-sector **weather** (embers / rain / flicker) · **gib** death effects ·
-  **gamepad + touch** controls · offscreen **floor-grid cache** · central **`js/balance.js`** tuning config.
+    Ammo – magazine + reserve fraction.
 
-## What's new in v7
+    Noise – sound made by shooting / sprinting (decays −0.35/frame).
 
-- **Research comparison modes** — Fuzzy AI, Static, Linear, and Chaos directors can replay the same seed. Run summaries capture accuracy, time, score, objectives, and average/peak threat.
-- **Run archive and resume** — the latest 12 runs are graphed and replayable; active runs autosave locally and can be resumed from setup.
-- **Dynamic objectives** — hold an uplink, breach terminals, purge nests, or recover a data core. Mission completion unlocks a sector cache.
-- **Themed procedural sectors** — laboratory bays, foundry lanes, cryo crossways, infested tunnels, and blackout grids have different layouts, hazards, ambience, and landmarks.
-- **Coordinated specialist AI** — medics, commanders, and stalkers share sightings and use cached flow-field navigation alongside the per-enemy fuzzy controller.
-- **Weapon modules and alternate fire** — suppressors, chokes, elemental ammunition, warheads, status effects, and weapon-specific alternate attacks (`X`).
-- **Accessibility** — complete key rebinding, aim assist, color-blind-safe threat colors, reduced flashing, HUD scaling, and the existing shake/motion/audio controls.
-- **Integrated first-person view** — optional pointer-lock 3D presentation with v7 world markers; simulation logic remains shared with 2D.
-- **Automated verification** — `index.html?smoke=1` deploys a deterministic browser smoke test and reports its result through `document.body.dataset`.
+    Pressure – how many enemies are already engaging you (based on distance and count).
 
-## Historical roadmap (completed)
+Fuzzy.infer() fires the complete 81-rule base (3⁴ combinations; AND = min, OR = max) and defuzzifies a single Threat output using centroid defuzzification.
 
-- ~~New fuzzy input for battlefield situation~~ ✔ shipped (Pressure, v2)
-- ~~Enemy archetypes~~ ✔ shipped (grunt / runner / brute, v2)
-- ~~Weapons, levelling, coins, power-ups~~ ✔ shipped (v3)
-- ~~Second fuzzy output: pickup drop rate~~ ✔ shipped (Supply, v4)
-- ~~Sound (WebAudio), screen-space lighting~~ ✔ shipped (v4)
-- ~~Boss waves; local-storage high scores~~ ✔ shipped (v4.1)
-- ~~Ranged enemy (spitter); Mamdani vs. Sugeno defuzzification toggle~~ ✔ shipped (v6)
+The Threat value directly controls:
+
+    Spawn cadence – higher Threat = faster spawns.
+
+    Horde size – higher Threat = more enemies per wave.
+
+    Drop generosity – higher Threat = more health/ammo drops (helps the desperate).
+
+    Enemy composition – higher Threat = more brutes and spitters.
+
+Enemy AI is perception-based:
+
+    See you (line-of-sight, blocked by walls & fog) → chase.
+
+    Hear you (range scales with Noise) → hunt the sound with positional error.
+
+    Neither → wander dumbly.
+
+The Logic Dashboard (toggle with Tab) shows the full fuzzy pipeline in real-time:
+
+    Fuzzification – crisp inputs → membership degrees (Low/Medium/High).
+
+    Active Rules – top 5 firing rules with antecedents and firing strengths.
+
+    Aggregation – clipped output sets (Low/Medium/High).
+
+    Defuzzification – final crisp Threat value with linguistic label.
+
+Full walkthrough with worked example: report/supporting-docs/Section3_Fuzzy_Logic_Walkthrough.md.
+Rule-base expansion: report/supporting-docs/Inference_Engine_Expansion_Report.md.
+Quick tuning cheat-sheet
+
+    Game too easy/hard overall → setup-screen slider ranges in js/screens.js (sliders array) or defaults in js/state.js (settings).
+
+    Director reacts too slow/fast → inference interval (G.fuzzyTimer >= 10) and noise gain/decay in js/mechanics.js.
+
+    Difficulty curve shape → rule heuristic score = (2-H) + (2-A) + N + P and MF breakpoints in js/fuzzy.js.
+
+    Threat→pressure mapping → formulas in spawnWave() and the cadence line in js/mechanics.js.
+
+Progression systems
+
+    Coins — earned per kill (grunt 5¢ / runner 8¢ / brute 15¢), shown in the MISSION panel, banked to localStorage on death so they persist between runs (key bansProtocolMeta_v1).
+
+    Weapons & levelling — RIFLE (free), SHOTGUN (350¢, 6-pellet spread), BAZOOKA (900¢, AoE blast). Buy/upgrade/equip in the ARMORY (setup screen); each upgrade is +25% damage, max level 5. Switch in-game with 1 / 2 / 3 or the bottom-left weapon pills.
+
+    Power-ups — randomized drop guaranteed every 10 kills + rare (4%) random drops: Shield 10 s · Rapid Fire 8 s · 2× Damage 8 s · Speed 8 s · Freeze 5 s · Instant Kill (everything on screen dies, white flash). Active effects show as timed pills at the bottom-right.
+
+    Operative upgrades (ARMORY, bottom strip) — permanent levels bought with coins: Move Speed (+8%/lvl) · Max Health (+25 HP/lvl) · Ammo Stock (+30 reserve/lvl) · Power-Ups (+15% duration/lvl). Applied automatically at every deploy.
+
+What's new
+Core MISO System (Final Assessment)
+
+    4 inputs → 1 output → 81 rules (simplified from 6→3→729).
+
+    Clear rule heuristic: score = (2-H) + (2-A) + N + P → mapped to Low (≤3), Medium (4-5), High (≥6).
+
+    Centroid defuzzification with a clean, easy-to-understand pipeline.
+
+    Live Logic Dashboard (toggle with Tab) showing Fuzzification → Rules → Aggregation → Defuzzification.
+
+    Interactive report (report/dossier.html) where you can drive the engine with sliders.
+
+Combat & Roguelite
+
+    Spitter (ranged) enemy + enemy projectiles.
+
+    Elite affixes (shielded / volatile / frenzied, coloured auras, double reward).
+
+    Boss attack patterns (telegraphed radial burst + charge).
+
+    Dodge dash (Shift, i-frames) · melee knife (F / RMB) with silent stealth takedowns.
+
+    Combo/killstreak score multiplier · damage-direction indicator + boss minimap ping.
+
+    Perks (pick 1 of 3 after each boss) · random sector modifiers · deployable mine [E] + turret [T] · exploding barrels + destructible walls · extraction beacon bonus objective · 11 achievements · Daily Seed toggle.
+
+Visual & Audio
+
+    Full-screen bloom, additive dynamic lighting, shockwave rings, hit-stop.
+
+    Raised 2.5D neon walls with threat-tinted rims · tech-grid floor · drifting dust · volumetric fog · scorch & blood decals · threat-reactive colour grading.
+
+    Procedural audio (every sound is synthesised) · ambient drone scored by Threat · low-HP heartbeat · threat-dynamic music.
+
+UX & Accessibility
+
+    Settings menu (volume, screen-shake, ambient motion, colour-blind mode, reduced flashing, aim assist, HUD scaling).
+
+    Pause menu with run stats (Resume / Settings / Restart / Quit).
+
+    First-run tutorial overlay · per-sector weather · gib death effects · gamepad + touch controls.
+
+    Run archive and resume – latest 12 runs graphed and replayable.
+
+Historical roadmap
+
+    ~~11-rule hand-written base~~ ✔ shipped (v1)
+
+    ~~New fuzzy input: Pressure~~ ✔ shipped (v2)
+
+    ~~Enemy archetypes (grunt / runner / brute)~~ ✔ shipped (v2)
+
+    ~~243 rules (5 inputs → 2 outputs)~~ ✔ shipped (v3)
+
+    ~~Weapons, levelling, coins, power-ups~~ ✔ shipped (v3)
+
+    ~~Second fuzzy output: Supply~~ ✔ shipped (v4)
+
+    ~~Sound (WebAudio), screen-space lighting~~ ✔ shipped (v4)
+
+    ~~Boss waves; local-storage high scores~~ ✔ shipped (v4.1)
+
+    ~~Ranged enemy (spitter)~~ ✔ shipped (v6)
+
+    ~~729 rules (6 inputs → 3 outputs)~~ ✔ shipped (v6)
+
+    ~~Mamdani vs. Sugeno defuzzification toggle~~ ✔ shipped (v6)
+
+    MISO simplification (4 inputs → 1 output → 81 rules) ✔ shipped (Final)
+
+    Logic Dashboard (Tab) ✔ shipped (Final)
+
+    Interactive report (dossier.html) ✔ shipped (Final)
+
+    GitHub Pages deployment ✔ shipped (Final)
+
+Credits
+
+    Molchat Doma – soundtrack (6 tracks, used under fair use for academic demonstration).
+
+    Three.js – optional 3D renderer (loaded from CDN or local fallback).
+
+    ISP568 Fuzzy Logic Systems – final assessment project.

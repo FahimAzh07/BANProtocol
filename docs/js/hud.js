@@ -585,26 +585,76 @@ function drawLogicDashboard() {
             ctx.fillText(term + ' (' + (strength * 100).toFixed(0) + '%)', gx + 14 + (t * 60), gy + gh + 14);
         }
         ctx.globalAlpha = 1;
-
-        // ---- SECTION 4: Defuzzification (Result) ----
-        const th = G.fuzzy.threat || 0;
-        const cx = x3 + w3 / 2;
-        const cy = y3 + h3 - 36;
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#7CFF9B';
-        ctx.font = 'bold 14px Consolas';
-        ctx.fillText('④ DEFUZZIFICATION (centroid)', cx, cy - 4);
-        ctx.fillStyle = '#7CFF9B';
-        ctx.font = '900 32px ' + UI.display;
-        ctx.shadowBlur = 14;
-        ctx.shadowColor = '#7CFF9B';
-        ctx.fillText('THREAT = ' + Math.round(th), cx, cy + 34);
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = '#8fa9c4';
-        ctx.font = '11px Consolas';
-        const label = th > 66 ? 'OVERWHELMING' : th > 33 ? 'TACTICAL' : 'PASSIVE';
-        ctx.fillText(label, cx, cy + 56);
     }
+
+        // ---- SECTION 4: DEFUZZIFICATION (CENTER BOTTOM HERO PANEL) ----
+    // ---- Define threat and colour ----
+    const th = G.fuzzy.threat || 0;
+    let thColor;
+    if (th > 66) thColor = '#ff4d6d';
+    else if (th > 33) thColor = '#ffb648';
+    else thColor = '#5fd0ff';
+
+    const w4 = 560;
+    const h4 = 200;
+    const x4 = (W - w4) / 2;
+    const y4 = y1 + h1 + 16;
+
+    panel(x4, y4, w4, h4, '④ DEFUZZIFICATION (CENTROID RESULT)');
+
+    const cx = W / 2;
+    const cy = y4 + 95;
+
+    // ---- Big Threat Value with colour ----
+    ctx.textAlign = 'center';
+    ctx.fillStyle = thColor;
+    ctx.font = '900 44px ' + UI.display;
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = thColor;
+    ctx.fillText('THREAT ' + Math.round(th), cx, cy + 6);
+    ctx.shadowBlur = 0;
+
+    // ---- Status label ----
+    let labelText, labelCol;
+    if (th > 66) { labelText = 'CRITICAL — OVERWHELMING'; labelCol = '#ff4d6d'; }
+    else if (th > 33) { labelText = 'CAUTION — TACTICAL'; labelCol = '#ffb648'; }
+    else { labelText = 'PASSIVE — SAFE'; labelCol = '#5fd0ff'; }
+
+    ctx.fillStyle = labelCol;
+    ctx.font = 'bold 15px Consolas';
+    ctx.fillText(labelText, cx, cy + 32);
+
+    // ---- Colour‑coded gauge bar ----
+    const gaugeX = x4 + 40;
+    const gaugeW = w4 - 80;
+    const gaugeY = cy + 40;
+    const gaugeH = 12;
+
+    // background
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    roundRect(gaugeX, gaugeY, gaugeW, gaugeH, 6);
+    ctx.fill();
+
+    // fill
+    if (th > 0) {
+        ctx.fillStyle = thColor;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = thColor;
+        const fillW = gaugeW * Math.min(1, th / 100);
+        if (fillW > 1) {
+            roundRect(gaugeX, gaugeY, fillW, gaugeH, 6);
+            ctx.fill();
+        }
+        ctx.shadowBlur = 0;
+    }
+
+    // tick marks
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.font = '8px Consolas';
+    ctx.textAlign = 'center';
+    ctx.fillText('0', gaugeX, gaugeY + 22);
+    ctx.fillText('50', gaugeX + gaugeW / 2, gaugeY + 22);
+    ctx.fillText('100', gaugeX + gaugeW, gaugeY + 22);
 
     // ---- Close hint ----
     ctx.textAlign = 'center';
